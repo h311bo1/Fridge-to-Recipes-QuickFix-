@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f4ee">
+  <title>QuickFix</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #20291f;
+      --muted: #687365;
+      --green: #315f43;
+      --green-dark: #244b34;
+      --cream: #f5f4ee;
+      --paper: #fffefa;
+      --line: #dedfd5;
+      --missing: #a34835;
+      --shadow: 0 16px 42px #24331c12;
+      font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse at 15% 0%, #e8ecdc 0, transparent 35rem),
+        var(--cream);
+    }
+    .shell { width: min(1080px, calc(100% - 36px)); margin: 0 auto; }
+    header { padding: 50px 0 30px; text-align: center; }
+    .eyebrow {
+      margin: 0 0 12px;
+      color: var(--green);
+      font-size: .76rem;
+      font-weight: 800;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.7rem, 7vw, 4.8rem);
+      font-weight: 500;
+      letter-spacing: -.06em;
+      line-height: 1;
+    }
+    .intro { max-width: 550px; margin: 16px auto 0; color: var(--muted); line-height: 1.6; }
+    main { padding-bottom: 60px; }
+    .form-card {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      padding: clamp(20px, 4vw, 34px);
+      background: var(--paper);
+      border: 1px solid #e8e8df;
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+    }
+    .field { display: flex; flex-direction: column; gap: 8px; }
+    .field-wide { grid-column: 1 / -1; }
+    label { font-size: .88rem; font-weight: 700; }
+    .hint { color: var(--muted); font-size: .8rem; }
+    input, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      outline: none;
+      padding: 12px 13px;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    input:focus, textarea:focus { border-color: var(--green); box-shadow: 0 0 0 3px #315f431c; }
+    textarea { min-height: 104px; resize: vertical; }
+    .constraints { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    button {
+      grid-column: 1 / -1;
+      justify-self: start;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 22px;
+      background: var(--green);
+      color: white;
+      font: inherit;
+      font-weight: 750;
+      cursor: pointer;
+      transition: background .15s, transform .15s;
+    }
+    button:hover { background: var(--green-dark); transform: translateY(-1px); }
+    button:disabled { cursor: wait; opacity: .7; transform: none; }
+    button:focus-visible { outline: 3px solid #8caf77; outline-offset: 3px; }
+    .status { min-height: 24px; margin: 20px 0 0; color: var(--muted); }
+    .status.error { color: #a02e25; }
+    .results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
+    .recipe-card {
+      min-width: 0;
+      padding: 22px;
+      background: var(--paper);
+      border: 1px solid #e8e8df;
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+    }
+    .recipe-number { color: var(--green); font-size: .75rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+    .recipe-card h2 { margin: 8px 0; font: 500 1.55rem/1.15 Georgia, "Times New Roman", serif; }
+    .cook-time { margin: 0 0 20px; color: var(--muted); font-size: .88rem; }
+    .recipe-card h3 { margin: 18px 0 9px; font-size: .87rem; }
+    ul, ol { margin: 0; padding-left: 20px; }
+    li { margin: 0 0 8px; font-size: .9rem; line-height: 1.45; }
+    .ingredient.have { color: var(--green-dark); }
+    .ingredient.missing { color: var(--missing); }
+    .badge { display: inline-block; margin-left: 4px; font-size: .66rem; font-weight: 800; letter-spacing: .04em; white-space: nowrap; }
+    footer { padding: 0 0 24px; color: var(--muted); text-align: center; font-size: .78rem; }
+    @media (max-width: 760px) {
+      header { padding-top: 36px; }
+      .results { grid-template-columns: 1fr; }
+      .recipe-card { padding: 20px; }
+    }
+    @media (max-width: 560px) {
+      .form-card, .constraints { grid-template-columns: 1fr; }
+      .field-wide, button { grid-column: auto; }
+      button { justify-self: stretch; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <p class="eyebrow">A little less waste, a lot more dinner</p>
+      <h1>QuickFix</h1>
+      <p class="intro">Tell us what you have. Get three practical ideas, with the missing ingredients clearly marked.</p>
+    </header>
+    <main>
+      <form id="recipe-form" class="form-card">
+        <div class="field field-wide">
+          <label for="ingredients">What’s in your fridge/kitchen?</label>
+          <textarea id="ingredients" name="ingredients" required placeholder="e.g. eggs, spinach, cooked rice, lemon"></textarea>
+          <span class="hint">Separate ingredients with commas or new lines.</span>
+        </div>
+        <div class="field">
+          <label for="dietary">Dietary restrictions</label>
+          <input id="dietary" name="dietary" placeholder="e.g. vegetarian, gluten-free">
+          <span class="hint">Optional; separate multiple restrictions with commas.</span>
+        </div>
+        <div class="field">
+          <label for="cuisine">Cuisine</label>
+          <input id="cuisine" name="cuisine" placeholder="e.g. Japanese, Mexican">
+          <span class="hint">Optional.</span>
+        </div>
+        <div class="field field-wide">
+          <div class="constraints">
+            <div class="field">
+              <label for="max-cook-time">Max cook time (minutes)</label>
+              <input id="max-cook-time" name="max_cook_time" type="number" min="1" step="1" placeholder="Any">
+            </div>
+            <div class="field">
+              <label for="servings">Servings</label>
+              <input id="servings" name="servings" type="number" min="1" step="1" placeholder="Any">
+            </div>
+            <div class="field" aria-hidden="true">
+              <span class="hint">All preferences are optional.</span>
+            </div>
+          </div>
+        </div>
+        <button id="submit-button" type="submit"><span>Find my recipes</span><span aria-hidden="true">→</span></button>
+      </form>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+      <section id="results" class="results" aria-label="Recipe suggestions"></section>
+    </main>
+    <footer>Your API key stays on this computer and is never sent to the browser.</footer>
+  </div>
+  <script>
+    const form = document.querySelector("#recipe-form");
+    const button = document.querySelector("#submit-button");
+    const status = document.querySelector("#status");
+    const results = document.querySelector("#results");
+
+    function addText(parent, tag, text, className) {
+      const element = document.createElement(tag);
+      element.textContent = text;
+      if (className) element.className = className;
+      parent.append(element);
+      return element;
+    }
+
+    function renderRecipes(recipes) {
+      results.replaceChildren();
+      recipes.forEach((recipe, index) => {
+        const card = document.createElement("article");
+        card.className = "recipe-card";
+        addText(card, "div", `Recipe ${index + 1}`, "recipe-number");
+        addText(card, "h2", recipe.title);
+        addText(card, "p", `About ${recipe.cook_time_minutes} minutes`, "cook-time");
+
+        addText(card, "h3", "Ingredients");
+        const ingredients = document.createElement("ul");
+        recipe.ingredients.forEach((ingredient) => {
+          const item = document.createElement("li");
+          item.className = `ingredient ${ingredient.in_fridge ? "have" : "missing"}`;
+          item.append(document.createTextNode(`${ingredient.name} `));
+          const badge = document.createElement("span");
+          badge.className = "badge";
+          badge.textContent = ingredient.in_fridge ? "AVAILABLE" : "MISSING";
+          item.append(badge);
+          ingredients.append(item);
+        });
+        card.append(ingredients);
+
+        addText(card, "h3", "Instructions");
+        const steps = document.createElement("ol");
+        recipe.instructions.forEach((step) => addText(steps, "li", step));
+        card.append(steps);
+        results.append(card);
+      });
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      status.className = "status";
+      status.textContent = "Finding three ideas…";
+      results.replaceChildren();
+      button.disabled = true;
+
+      const data = new FormData(form);
+      const ingredients = String(data.get("ingredients"))
+        .split(/[,\n]/).map((item) => item.trim()).filter(Boolean);
+      const dietary = String(data.get("dietary"))
+        .split(",").map((item) => item.trim()).filter(Boolean);
+      const optionalNumber = (name) => {
+        const value = String(data.get(name)).trim();
+        return value ? Number(value) : null;
+      };
+
+      try {
+        const response = await fetch("/api/recipes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ingredients,
+            dietary,
+            cuisine: String(data.get("cuisine")).trim(),
+            max_cook_time: optionalNumber("max_cook_time"),
+            servings: optionalNumber("servings")
+          })
+        });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.error || "Could not get recipes.");
+        renderRecipes(payload.recipes);
+        status.textContent = "Here are your three recipe ideas.";
+      } catch (error) {
+        status.className = "status error";
+        status.textContent = error instanceof Error
+          ? error.message
+          : "Something went wrong. Please try again.";
+      } finally {
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
