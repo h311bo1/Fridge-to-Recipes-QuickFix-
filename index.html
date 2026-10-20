@@ -143,14 +143,13 @@
           <span class="hint">Separate ingredients with commas or new lines.</span>
         </div>
         <div class="field">
-          <label for="dietary">Dietary restrictions</label>
+          <label for="dietary">Dietary restrictions (optional)</label>
           <input id="dietary" name="dietary" placeholder="e.g. vegetarian, gluten-free">
-          <span class="hint">Optional; separate multiple restrictions with commas.</span>
         </div>
         <div class="field">
           <label for="cuisine">Cuisine</label>
           <input id="cuisine" name="cuisine" placeholder="e.g. Japanese, Mexican">
-          <span class="hint">Optional.</span>
+
         </div>
         <div class="field field-wide">
           <div class="constraints">
@@ -159,11 +158,10 @@
               <input id="max-cook-time" name="max_cook_time" type="number" min="1" step="1" placeholder="Any">
             </div>
             <div class="field">
-              <label for="servings">Servings</label>
+              <label for="servings">Servings size</label>
               <input id="servings" name="servings" type="number" min="1" step="1" placeholder="Any">
             </div>
             <div class="field" aria-hidden="true">
-              <span class="hint">All preferences are optional.</span>
             </div>
           </div>
         </div>
@@ -172,7 +170,6 @@
       <p id="status" class="status" role="status" aria-live="polite"></p>
       <section id="results" class="results" aria-label="Recipe suggestions"></section>
     </main>
-    <footer>Your API key stays on this computer and is never sent to the browser.</footer>
   </div>
   <script>
     const form = document.querySelector("#recipe-form");
